@@ -14,3 +14,17 @@ _book
 *.epub
 *.mobi
 *.pdf
+
+UserService.Contracts/obj/
+
+UserService.Core/bin/
+
+UserService.Core/obj/
+
+UserService.Infrastructure/bin/
+
+UserService.Infrastructure/obj/
+
+UserService.Ports/bin/
+
+UserService.Ports/obj/

@@ -1,0 +1,45 @@
+﻿version: '3.8'
+services:
+ sysshow-userservice-ports:
+    image: ${REGISTRY:-userservice}/userservice.ports:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: UserService.Ports/Dockerfile.dev
+    ports:
+      - '50000:8080'
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - sysshow_sysshow-network
+    
+ sysshow-userservice-ports-dapr:
+    image: "daprio/daprd:latest"
+    command: [
+      "./daprd",
+      "--app-id", "sysshow-userservice-ports",
+      "--app-port", "8080", # Application port
+      "--dapr-http-port", "3500", # This must match the value in the components yaml
+      "--dapr-grpc-port", "50001", # Needed for inter-dapr communication
+      "--metrics-port", "9091", # Added this line
+      "--log-level", "info",
+      "--placement-host-address", "dapr-placement:50006",
+      "--components-path","/dapr/components",
+      "--config","/dapr/config.yaml" # Path to the Dapr config file in the container
+    ]
+    network_mode: "service:sysshow-userservice-ports"
+    volumes:
+      - "./.dapr/components:/dapr/components" # Make sure dapr_config.yaml is in the local .dapr/components folder
+      - "./.dapr/:/dapr" # Make sure dapr_config.yaml is in the local .dapr/ folder
+
+
+#  ngrok:
+#    image: ngrok/ngrok:latest
+#    environment:
+#      - NGROK_AUTHTOKEN=2YkUkoOPVyVZ2D0jorH7JErTA7b_38biyEsaFq2hSuuxqx9Fv
+#      - DOMAIN=enough-briefly-buzzard.ngrok-free.app
+#    network_mode: "host"
+#    command: http --domain=enough-briefly-buzzard.ngrok-free.app 50013
+
+networks:
+  sysshow_sysshow-network:
+    external: true
